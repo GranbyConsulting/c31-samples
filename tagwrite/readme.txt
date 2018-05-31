@@ -6,3 +6,8 @@ placed in the WEB directory on the memory card. The FTP
 batch file can be used to do this automatically, which is
 nice when you're debugging the source code. Note that the
 database network configuration may need to be changed!
+
+PS: The answer.htm file contains the answer to the exercise
+for the reader referenced in the default.htm file. You could
+even you further and create AJAX updates of the displayed
+data using a similar mechanism...

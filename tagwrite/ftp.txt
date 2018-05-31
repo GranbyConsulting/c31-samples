@@ -1,4 +1,5 @@
 CD /WEB
 ASCII
 PUT default.htm
+PUT answer.htm
 QUIT
