@@ -9,5 +9,5 @@ database network configuration may need to be changed!
 
 PS: The answer.htm file contains the answer to the exercise
 for the reader referenced in the default.htm file. You could
-even you further and create AJAX updates of the displayed
+go even further and create AJAX updates of the displayed
 data using a similar mechanism...
