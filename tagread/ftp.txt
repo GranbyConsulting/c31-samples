@@ -1,0 +1,4 @@
+CD /WEB
+ASCII
+PUT default.htm
+QUIT
