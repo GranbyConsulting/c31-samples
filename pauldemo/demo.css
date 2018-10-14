@@ -1,0 +1,44 @@
+﻿
+.tile {
+	width: 200px;
+	height: 200px;
+	margin: 10px;
+}
+
+.tile-text {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+	text-align: center;
+}
+
+.tile-name {
+	font-size: 20px;
+	color: #FFFFFF;
+}
+
+.tile-data {
+	font-size: 80px;
+	color: #FFFFFF;
+}
+
+.bar-div {
+	width: 70%;
+	height: 50px;
+}
+
+.bar-text {
+	float: left;
+	margin-right: 1em;
+}
+
+.bar-fast {
+	width: 0%;
+	background-image: none;
+	transition: none !important;
+}
+
+.bar-slow {
+	width: 0%;
+	background-image: none;
+}

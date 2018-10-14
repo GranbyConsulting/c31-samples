@@ -1,0 +1,7 @@
+CD /WEB
+ASCII
+PUT default.htm
+PUT bars.htm
+PUT tiles.htm
+PUT demo.css
+QUIT
