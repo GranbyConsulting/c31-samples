@@ -4,4 +4,5 @@ PUT default.htm
 PUT bars.htm
 PUT tiles.htm
 PUT demo.css
+PUT demo.js
 QUIT
