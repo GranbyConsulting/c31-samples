@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <%Include /stdhead.htm%>
+    <script src="chart.min.js"></script>
+</head>
+<body>
+    <%Include /stdnavbar.htm%>
+    <%NoCache%>
+    <div class="container" role="main">
+        <div class="page-header">
+            <h1>Dynamic Chart</h1>
+            <button type="button" class="btn btn-sm btn-default" id="type0">Bargraph</button>
+            <button type="button" class="btn btn-sm" id="type1">Pie Chart</button>
+            <button type="button" class="btn btn-sm" id="type2">Doughnut</button>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="chartObject" width="400" height="400"></canvas>
+            </div>
+            <div class="col-md-6">
+                <table class='table'>
+                    <thead>
+                        <tr><th>Tag Data</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="vertical-align:middle" id="showTag1"><%=Tags.Tag1%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag2"><%=Tags.Tag2%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag3"><%=Tags.Tag3%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag4"><%=Tags.Tag4%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag5"><%=Tags.Tag4%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag6"><%=Tags.Tag4%></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="alert-placeholder" style="width: 80%; padding-top: 25px">
+        </div>
+</body>
+<script type="text/javascript">
+
+    var chartType = 0;
+
+    var chartObject;
+
+    function doDocument() {
+
+        // This function is called when the document is ready by
+        // virtue of $(document).ready call right at the bottom
+        // of this script. We call Crimson's default handler,
+        // create the chart, bind the chart type buttons and
+        // then start the tag update process.
+
+        doSession();
+
+        makeChart();
+
+        bindButtons();
+
+        sendRead();
+    }
+
+    function makeChart() {
+
+        // Create a chart based on the current type.
+
+        var ctx = document.getElementById("chartObject").getContext('2d');
+
+        var type, show;
+
+        switch (chartType) {
+
+            case 0:
+                type = "bar";
+                show = false;
+                break;
+
+            case 1:
+                type = "pie";
+                show = true;
+                break;
+
+            case 2:
+                type = "doughnut";
+                show = true;
+                break;
+        }
+
+        chartObject = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5", "Tag6"],
+                datasets: [{
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                legend: {
+                    display: show
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            suggestedMax: 100
+                        }
+                    }]
+                },
+                animation: {
+                    duration: 200
+                },
+                events: [
+                    'click'
+                ]
+            }
+        });
+    }
+
+    function bindButtons() {
+
+        // Bind the chart type buttons to update the type.
+
+        $("#type0").click(function() { onClick(0); });
+        $("#type1").click(function() { onClick(1); });
+        $("#type2").click(function() { onClick(2); });
+    }
+
+    function onClick(n) {
+
+        // Update the chart type and type button styles.
+
+        chartType = n;
+
+        for (s = 0; s < 3; s++) {
+
+            if (s == n)
+                $("#type" + s).attr("class", "btn btn-sm btn-default");
+            else
+                $("#type" + s).attr("class", "btn btn-sm");
+        }
+
+        delete chartObject;
+
+        makeChart();
+    }
+
+    function sendRead() {
+
+        // Create the request to read the tag values.
+
+        var xhr = new XMLHttpRequest();
+
+        var url = "/ajax/dataview-read.htm?page=1" + cacheBreaker();
+
+        xhr.open("GET", url, true);
+
+        xhr.onload = function () {
+
+            // If the request completed, check the return code.
+
+            if (xhr.status == 200) {
+
+                // If it is 200, split the response into lines.
+
+                var list = xhr.responseText.split("\n");
+
+                for (var n = 0; n < list.length; n++) {
+
+                    // For each line, find the associated display
+                    // element and the data value from the server.
+
+                    var sid = "#showTag" + (n + 1);
+
+                    var fields = list[n].split("\t");
+
+                    // Update the data values.
+
+                    $(sid).html(fields[0]);
+
+                    // Update the chart data.
+
+                    chartObject.data.datasets[0].data[n] = fields[0];
+                }
+
+                // Redraw the chart.
+
+                chartObject.update();
+
+                // Start the read process after a delay.
+
+                setTimeout(sendRead, 10);
+            }
+            else {
+
+                // If we got another code, the read failed.
+
+                readFailed();
+            }
+        };
+
+        xhr.onerror = function () {
+
+            // If the request failed, let the user know.
+
+            readFailed();
+        };
+
+        // Send the request to the server.
+
+        xhr.send(null);
+    }
+
+    function readFailed() {
+
+        // We have a couple of choices here.
+
+        if (true) {
+
+            // The first is to show an error message, let that timeout
+            // and then restart the process after another delay.
+
+            alertShow("alert-danger", "Error", "Failed to read values from server.");
+        }
+        else {
+
+            // The second is just to ERROR out the fields and
+            // then start the read again after a short delay.
+
+            // Note this code is expecting to find td elements!
+
+            $("td[id^=showTag]").html("ERROR");
+
+            setTimeout(sendRead, 500);
+        }
+    }
+
+    function alertHide() {
+
+        // Hide the alert message that we displayed.
+
+        clearTimeout(timeout);
+
+        $("#alertdiv").remove();
+
+        // And try the read again after a delay.
+
+        setTimeout(sendRead, 1500);
+    }
+
+    function alertShow(coloring, tagword, message) {
+
+        // Show an alert message at the appropriate placeholder for 2.5 seconds.
+
+        $("#alert-placeholder").html("<div id='alertdiv' class='alert " + coloring + " alert-dismissable'>" +
+            "<a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" +
+            "<span><strong>" + tagword + "!</strong> " + message + "</span></div>"
+        );
+
+        timeout = setTimeout(alertHide, 2500);
+    }
+
+</script>
+<script type="text/javascript">$(document).ready(doDocument);</script>
+</html>
