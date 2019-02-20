@@ -10,14 +10,13 @@
     <div class="container" role="main">
         <div class="page-header">
             <h1>Dynamic Chart</h1>
-            <p id="updateTime">0</p>
             <button type="button" class="btn btn-sm btn-default" id="type0">Bargraph</button>
             <button type="button" class="btn btn-sm" id="type1">Pie Chart</button>
             <button type="button" class="btn btn-sm" id="type2">Doughnut</button>
         </div>
         <div class="row">
             <div class="col-md-6">
-                <canvas id="chartObject" width="400" height="400"></canvas>
+                <canvas id="tChart" width="400" height="400"></canvas>
             </div>
             <div class="col-md-6">
                 <table class='table'>
@@ -26,11 +25,9 @@
                     </thead>
                     <tbody>
                         <tr><td style="vertical-align:middle" id="showTag1"><%=Tags.Tag1%></td></tr>
-                        <tr><td style="vertical-align:middle" id="showTag2"><%=Tags.Tag2%></td></tr>
-                        <tr><td style="vertical-align:middle" id="showTag3"><%=Tags.Tag3%></td></tr>
-                        <tr><td style="vertical-align:middle" id="showTag4"><%=Tags.Tag4%></td></tr>
-                        <tr><td style="vertical-align:middle" id="showTag5"><%=Tags.Tag4%></td></tr>
-                        <tr><td style="vertical-align:middle" id="showTag6"><%=Tags.Tag4%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag2"><%=Tags.apples%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag3"><%=Tags.months%></td></tr>
+                        <tr><td style="vertical-align:middle" id="showTag4"><%=Tags.gallons%></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -42,13 +39,7 @@
 
     var chartType = 0;
 
-    var chartObject;
-
-    var lastTime;
-
-    var deltaTotal = 0;
-
-    var deltaCount = 0;
+    var tChart;
 
     function doDocument() {
 
@@ -57,8 +48,6 @@
         // of this script. We call Crimson's default handler,
         // create the chart, bind the chart type buttons and
         // then start the tag update process.
-
-        lastTime = new Date();
 
         doSession();
 
@@ -73,62 +62,62 @@
 
         // Create a chart based on the current type.
 
-        var ctx = document.getElementById("chartObject").getContext('2d');
+        var ctx = document.getElementById("tChart").getContext('2d');
 
-        var type, show;
+        var typeName, showLegend, showScale;
 
         switch (chartType) {
 
             case 0:
-                type = "bar";
-                show = false;
+                typeName   = "bar";
+                showLegend = false;
+                showScale  = true;
                 break;
 
             case 1:
-                type = "pie";
-                show = true;
+                typeName   = "pie";
+                showLegend = true;
+                showScale  = false;
                 break;
 
             case 2:
-                type = "doughnut";
-                show = true;
+                typeName   = "doughnut";
+                showLegend = true;
+                showScale  = false;
                 break;
         }
 
-        chartObject = new Chart(ctx, {
-            type: type,
+        // !TB! Make sure the number of labels and data items
+        // match, or the pie charts will show strange things.
+
+        tChart = new Chart(ctx, {
+            type: typeName,
             data: {
-                labels: ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5", "Tag6"],
+                labels: ["Tag1", "apples", "months"],
                 datasets: [{
-                    data: [0, 0, 0, 0, 0, 0],
+                    data: [0, 0, 0],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
+                        'rgba(255, 206, 86, 0.2)'
                     ],
                     borderColor: [
                         'rgba(255,99,132,1)',
                         'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
+                        'rgba(255, 206, 86, 1)'
                     ],
                     borderWidth: 1
                 }]
             },
             options: {
                 legend: {
-                    display: show
+                    display: showLegend
                 },
                 scales: {
                     yAxes: [{
+                        display: showScale,
                         ticks: {
-                            beginAtZero: true,
-                            suggestedMax: 100
+                            beginAtZero: true
                         }
                     }]
                 },
@@ -146,9 +135,9 @@
 
         // Bind the chart type buttons to update the type.
 
-        $("#type0").click(function() { onClick(0); });
-        $("#type1").click(function() { onClick(1); });
-        $("#type2").click(function() { onClick(2); });
+        $("#type0").click(function () { onClick(0); });
+        $("#type1").click(function () { onClick(1); });
+        $("#type2").click(function () { onClick(2); });
     }
 
     function onClick(n) {
@@ -165,7 +154,7 @@
                 $("#type" + s).attr("class", "btn btn-sm");
         }
 
-        delete chartObject;
+        delete tChart;
 
         makeChart();
     }
@@ -188,43 +177,65 @@
 
                 // If it is 200, split the response into lines.
 
-                var list = xhr.responseText.split("\n");
+                var disp = xhr.responseText.split("\n");
 
-                for (var n = 0; n < list.length; n++) {
+                // Update displayed tags
+
+                for (var i = 0; i < disp.length; i++) {
 
                     // For each line, find the associated display
                     // element and the data value from the server.
 
-                    var sid = "#showTag" + (n + 1);
+                    var sid    = "#showTag" + (i + 1);
 
-                    var fields = list[n].split("\t");
+                    var fields = disp[i].split("\t");
 
                     // Update the data values.
 
                     $(sid).html(fields[0]);
 
-                    // Update the chart data.
+                }
 
-                    chartObject.data.datasets[0].data[n] = fields[0];
+                // Update the chart.
+
+                // !TB! Method 1. This is what I intended originally, in
+                // that the bars array contains the index numbers of the
+                // source tags relative to the data page that we are using.
+
+                if (0) {
+
+                    var bars = [0, 1, 2];
+
+                    for (var j = 0; j < bars.length; j++) {
+
+                        var fields = disp[bars[j]].split("\t");
+
+                        tChart.data.datasets[0].data[j] = fields[0];
+                    }
+
+                }
+
+                // !TB! Method 2. You had loaded bars with HTML tag ids,
+                // but they can't be used to index into disp. But if we
+                // prefix them with # we can use JQuery to refer to the
+                // HTML element and extract its value, loading that data
+                // into the chart. So instead of working from tag indices,
+                // this works from the names of the elements into which
+                // the code above has already stored the data!
+
+                if (1) {
+
+                    var bars = ["#showTag1", "#showTag2", "#showTag3"];
+
+                    for (var j = 0; j < bars.length; j++) {
+
+                        tChart.data.datasets[0].data[j] = $(bars[j]).html();
+                    }
                 }
 
                 // Redraw the chart.
 
-                chartObject.update();
-
-                // Find the update time.
-
-                var thisTime = new Date();
-
-                var stepTime = thisTime - lastTime;
-
-                deltaTotal += stepTime;
-
-                deltaCount += 1;
-
-                $("#updateTime").html(Math.round(deltaTotal / deltaCount));
-
-                lastTime = thisTime;
+                tChart.update();
 
                 // Start the read process after a delay.
 

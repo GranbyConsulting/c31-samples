@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<%Include /stdhead.htm%>
+</head>
+<body>
+	<%Include /stdnavbar.htm%>
+	<%NoCache%>
+	<div class="container" role="main">
+		<div class="page-header">
+			<h1>Sample Page</h1>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<table class='table'>
+					<thead>
+						<tr><th>Tag Data</th></tr>
+					</thead>
+					<tbody>
+						<tr><td style="vertical-align:middle" id="showTag1"><%=Tags.Group1.Tag1%></td></tr>
+						<tr><td style="vertical-align:middle" id="showTag2"><%=Tags.Group1.Tag2%></td></tr>
+						<tr><td style="vertical-align:middle" id="showTag3"><%=Tags.Group1.Tag3%></td></tr>
+						<tr><td style="vertical-align:middle" id="showTag4"><%=Tags.Group1.Tag4%></td></tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	<div id="panel" style="width: 30%" class="panel panel-primary">
+		<div class="panel-heading">Panel Heading</div>
+  		<div class="panel-body ">This is my panel.</div>
+	</div>	
+	<div id="alert-placeholder" style="width: 80%; padding-top: 25px">
+	</div>
+</body>
+<script type="text/javascript">
+
+function doDocument() {
+
+	// This function is called when the document is ready by
+	// virtue of $(document).ready call right at the bottom
+	// of this script. We call Crimson's default handler,
+	// allocate the request we'll be using and then start the
+    // tag update process.
+
+    doSession();
+
+    sendRead();
+}
+
+function sendRead() {
+
+    // Create the request to read the tag values.
+
+    var xhr = new XMLHttpRequest();
+
+    var url = "/ajax/dataview-read.htm?page=1" + cacheBreaker();
+
+    xhr.open("GET", url, true);
+
+    xhr.onload = function () {
+
+        // If the request completed, check the return code.
+
+        if (xhr.status == 200) {
+
+            // If it is 200, split the response into lines.
+
+            var list = xhr.responseText.split("\n");
+
+            for (var n = 0; n < list.length; n++) {
+
+                // For each line, find the associated display
+                // element and the data value from the server.
+
+                var sid = "#showTag" + (n + 1);
+
+                var fields = list[n].split("\t");
+
+                // Update the new data values.
+
+                $(sid).html(fields[0]);
+            }
+			
+			// Update the panel style
+			
+			var data = parseInt((list[2].split("\t"))[0]);
+			
+			var cname  = data % 20 >= 10 ? "panel-danger" : "panel-primary";
+			
+			$("#panel").removeClass("panel-primary panel-danger").addClass(cname);
+
+            // Start the read process after a delay.
+
+            setTimeout(sendRead, 10);
+        }
+        else {
+
+            // If we got another code, the read failed.
+
+            readFailed();
+        }
+    };
+
+    xhr.onerror = function () {
+
+        // If the request failed, let the user know.
+
+        readFailed();
+    };
+
+    // Send the request to the server.
+
+    xhr.send(null);
+}
+
+function readFailed() {
+
+    // We have a couple of choices here.
+
+    if (true) {
+
+        // The first is to show an error message, let that timeout
+        // and then restart the process after another delay.
+
+        alertShow("alert-danger", "Error", "Failed to read values from server.");
+    }
+    else {
+         
+        // The second is just to ERROR out the fields and
+        // then start the read again after a short delay.
+
+        // Note this code is expecting to find td elements!
+
+        $("td[id^=showTag]").html("ERROR");
+
+        setTimeout(sendRead, 500);
+    }
+}
+
+function alertHide() {
+
+	// Hide the alert message that we displayed.
+
+	clearTimeout(timeout);
+
+	$("#alertdiv").remove();
+
+    // And try the read again after a delay.
+
+	setTimeout(sendRead, 1500);
+}
+
+function alertShow(coloring, tagword, message) {
+
+	// Show an alert message at the appropriate placeholder for 2.5 seconds.
+
+	$("#alert-placeholder").html( "<div id='alertdiv' class='alert " + coloring + " alert-dismissable'>" +
+								  "<a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" +
+								  "<span><strong>" + tagword + "!</strong> " + message + "</span></div>"
+								  );
+
+	timeout = setTimeout(alertHide, 2500);
+}
+
+</script>
+<script type="text/javascript">$(document).ready(doDocument);</script>
+</html>

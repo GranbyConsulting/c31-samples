@@ -2,5 +2,4 @@ MKDIR /WEB
 CD /WEB
 ASCII
 PUT default.htm
-PUT chart.min.js
 QUIT
