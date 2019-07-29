@@ -1,2 +1,2 @@
 
-ftp.exe -A -s:ftp.txt chart.local
+ftp.exe -A -s:ftp.txt test.local

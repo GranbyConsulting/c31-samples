@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <script src="/assets/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script type="text/javascript" src="/assets/js/session.js"></script>
+    <script type="text/javascript" src="js/myjs.js"></script>
+    <script type="text/javascript" src="/assets/js/dataview.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("button").click(function () {
+                doUpdate();
+            });
+            doUpdate();
+        });
+    </script>
+
+    <script>
+        function doUpdate() {
+            $.get("/ajax/dataview-read.htm?page=1", function (data, status) {
+                var tags = data.split('\n');
+                document.getElementById("data0").innerHTML = tags[0];
+            });
+        }
+
+    </script>
+
+    <script>
+        window.setInterval(function () {
+            doUpdate();
+        }, 500);
+
+    </script>
+
+    <%Include /stdhead.htm%>
+    <%Include /stdnavbar.htm%>
+    <%NoCache%>
+
+</head>
+<body>
+
+    <div class="jumbotron text-center">
+        <h1><%=Global.Title%></h1>
+        <h2><%=Global.Home%></h2>
+        <p>Resize this responsive page to see the effect!</p>
+        <p id='data0'><%=Tags.Group1.Tag1%></p>
+        <br>
+        <button>BLAH!</button>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <h3>Column 1</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+            </div>
+            <div class="col-sm-4">
+                <h3>Column 2</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+            </div>
+            <div class="col-sm-4">
+                <h3>Column 3</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">$(document).ready(doSession(doUpdate()));</script>
+</html>
