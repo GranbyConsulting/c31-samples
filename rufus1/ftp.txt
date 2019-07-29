@@ -1,5 +1,8 @@
-MKDIR /WEB
-CD /WEB
 ASCII
+MKDIR /WEB
+MKDIR /WEB/JS
+CD /WEB
 PUT default.htm
+CD /WEB/JS
+PUT myjs.js
 QUIT

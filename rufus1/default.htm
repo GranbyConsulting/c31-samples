@@ -8,41 +8,12 @@
     <script src="/assets/js/jquery.min.js"></script>
     <script type="text/javascript" src="/assets/js/ie10-viewport-bug-workaround.js"></script>
     <script type="text/javascript" src="/assets/js/session.js"></script>
-    <script type="text/javascript" src="js/myjs.js"></script>
-    <script type="text/javascript" src="/assets/js/dataview.js"></script>
-    <script>
-        $(document).ready(function () {
-            $("button").click(function () {
-                doUpdate();
-            });
-            doUpdate();
-        });
-    </script>
-
-    <script>
-        function doUpdate() {
-            $.get("/ajax/dataview-read.htm?page=1", function (data, status) {
-                var tags = data.split('\n');
-                document.getElementById("data0").innerHTML = tags[0];
-            });
-        }
-
-    </script>
-
-    <script>
-        window.setInterval(function () {
-            doUpdate();
-        }, 500);
-
-    </script>
-
+    <script type="text/javascript" src="/user/js/myjs.js"></script>
     <%Include /stdhead.htm%>
     <%Include /stdnavbar.htm%>
     <%NoCache%>
-
 </head>
 <body>
-
     <div class="jumbotron text-center">
         <h1><%=Global.Title%></h1>
         <h2><%=Global.Home%></h2>
@@ -73,5 +44,5 @@
     </div>
 
 </body>
-<script type="text/javascript">$(document).ready(doSession(doUpdate()));</script>
+<script type="text/javascript">$(document).ready(doSession(doStartup()));</script>
 </html>
